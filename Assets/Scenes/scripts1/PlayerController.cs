@@ -1,29 +1,62 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
-    public int speed = 0;
-    // Start is called before the first frame update
+
+    public float speed;
+    public float jumpAmount;
+    public Text countText;
+    public Text winText;
+
+    private Rigidbody rb;
+    private int count;
+
+
     void Start()
     {
+        rb = GetComponent<Rigidbody>();
+        count = 0;
+        SetCountText();
+        winText.text = "";
+        
         
     }
 
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        // get input data from keyboard or controller 
         float moveHorizontal = Input.GetAxis("Horizontal");
         float moveVertical = Input.GetAxis("Vertical");
-        // update player position based on input 
-        Vector3 position = transform.position;
-        position.x += moveHorizontal * speed * Time.deltaTime;
-        position.z += moveVertical * speed * Time.deltaTime;
-        transform.position = position;
+        bool jump = Input.GetKeyDown(KeyCode.Space);
 
+        Vector3 movement = new Vector3(moveHorizontal, 0, moveVertical);
+        if (jump)
+        {
+            rb.AddForce(new Vector3(0.0f, 1.0f, 0.0f) * jumpAmount, ForceMode.Impulse);
+            
+        }
 
+        rb.AddForce(movement * speed);
+        
+    }
 
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Pick Up"))
+        {
+            other.gameObject.SetActive(false);
+            count = count + 1;
+            SetCountText();
+        }
+    }
+
+    void SetCountText()
+    {
+        countText.text = "Count: " + count.ToString();
+        if (count >= 0)
+        {
+            winText.text = "You Win!";
+        }
     }
 }
